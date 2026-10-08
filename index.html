@@ -1,96 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biel do Corte - Agendamento</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-</head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans flex flex-col items-center p-4">
-
-  <main class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl my-6">
-    <!-- Cabeçalho -->
-    <div class="text-center mb-5">
-      <div class="inline-flex items-center justify-center w-14 h-14 bg-amber-500/10 text-amber-500 rounded-full mb-3 text-2xl border border-amber-500/20">
-        <i class="fa-solid fa-scissors"></i>
-      </div>
-      <h1 class="text-2xl font-black tracking-tight text-white uppercase">Biel do Corte</h1>
-      <p class="text-xs text-zinc-400 mt-1">Agenda de Quarta a Sábado • Almoço das 12h às 13h</p>
-    </div>
-
-    <!-- Alerta de Pagamento / PIX -->
-    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mb-5 flex items-start gap-2.5">
-      <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5 text-sm"></i>
-      <div class="text-xs text-zinc-300 leading-relaxed">
-        <strong class="text-amber-400 uppercase font-bold block mb-0.5">Atenção ao agendar:</strong>
-        O horário só é confirmado após o envio do comprovante do PIX no WhatsApp. Sem pagamento, o horário continua vago.
-      </div>
-    </div>
-
-    <form id="bookingForm" class="space-y-4">
-      <!-- 1. Nome -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Seu Nome</label>
-        <input type="text" id="clientName" required placeholder="Ex: João da Silva"
-          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" />
-      </div>
-
-      <!-- 2. WhatsApp -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Seu Telefone / WhatsApp</label>
-        <input type="tel" id="clientPhone" required placeholder="(32) 99999-9999"
-          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" />
-      </div>
-
-      <!-- 3. Tipo de corte / Serviço -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Tipo de Serviço</label>
-        <select id="serviceSelect" required
-          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
-          <option value="Corte de Cabelo">Corte de Cabelo</option>
-          <option value="Barba">Barba</option>
-          <option value="Combo Cabelo + Barba">Combo Cabelo + Barba</option>
-          <option value="Sobrancelha">Sobrancelha</option>
-          <option value="Cabelo + Sobrancelha">Cabelo + Sobrancelha</option>
-        </select>
-      </div>
-
-      <!-- 4. Data -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Data do Agendamento</label>
-        <input type="date" id="bookingDate" required
-          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" />
-      </div>
-
-      <!-- 5. Horários Dinâmicos -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Horário Desejado</label>
-        <div id="slotsContainer" class="grid grid-cols-3 gap-2 mt-2">
-          <!-- Gerado via script -->
-        </div>
-        <input type="hidden" id="selectedTime" required />
-      </div>
-
-      <!-- Botão de Confirmação -->
-      <button type="submit"
-        class="w-full mt-6 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-lg shadow-amber-500/20 active:scale-[0.99]">
-        <i class="fa-brands fa-whatsapp text-lg"></i>
-        <span>Confirmar e Enviar no WhatsApp</span>
-      </button>
-    </form>
-  </main>
-
-  <script>
+<script>
     // =======================================================
-    // ⚙️ INSIRA SUAS CONFIGURAÇÕES AQUI:
+    // ⚙️ SUAS CONFIGURAÇÕES:
     // =======================================================
-    const BARBER_WHATSAPP = "5532999996312"; // WhatsApp do Biel (DDD + número sem espaços)
-    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxKoKCz0ywvjVSAzITK82x6ob7P2QU-aEpsgQHze0zOrGR0U9iwFwVpTxMqtaZKV08n/exec"; // Cole a URL que você gerou no Apps Script
+    const BARBER_WHATSAPP = "5532999996312"; // Zap do Biel (DDD + número)
+    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxKoKCz0ywvjVSAzITK82x6ob7P2QU-aEpsgQHze0zOrGR0U9iwFwVpTxMqtaZKV08n/exec"; // Sua URL do Apps Script
     // =======================================================
 
-    // Horários oficiais do Biel por dia:
-    // 0 = Dom, 1 = Seg, 2 = Ter, 3 = Qua, 4 = Qui, 5 = Sex, 6 = Sáb
     const HORARIOS_OFICIAIS = {
       3: [ // QUARTA-FEIRA
         "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -123,24 +38,39 @@
     const selectedTimeInput = document.getElementById("selectedTime");
     const phoneInput = document.getElementById("clientPhone");
 
-    // Bloqueia dias anteriores a hoje
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
     dateInput.value = today;
 
-    // Máscara de telefone
     phoneInput.addEventListener("input", (e) => {
       let x = e.target.value.replace(/\D/g, "").match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
       e.target.value = !x[2] ? x[1] : `(${x[1]}) ${x[2]}` + (x[3] ? `-${x[3]}` : "");
     });
 
-    function renderSlots() {
-      slotsContainer.innerHTML = "";
+    // Busca horários já reservados na planilha
+    async function buscarHorariosOcupados(dataFormatada) {
+      try {
+        const resp = await fetch(`${GOOGLE_SHEETS_URL}?data=${encodeURIComponent(dataFormatada)}`);
+        const json = await resp.json();
+        return json.ocupados || [];
+      } catch (e) {
+        console.warn("Não foi possível carregar horários ocupados:", e);
+        return [];
+      }
+    }
+
+    async function renderSlots() {
+      slotsContainer.innerHTML = `
+        <div class="col-span-3 py-3 text-center text-xs text-zinc-400">
+          <i class="fa-solid fa-spinner fa-spin mr-1 text-amber-500"></i> Verificando horários livres...
+        </div>
+      `;
       selectedTimeInput.value = "";
 
       const parts = dateInput.value.split("-");
       const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
       const dayOfWeek = selectedDate.getDay();
+      const dateFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
       const horarios = HORARIOS_OFICIAIS[dayOfWeek];
 
@@ -154,19 +84,31 @@
         return;
       }
 
+      // Consulta a planilha para saber quem já reservou
+      const ocupados = await buscarHorariosOcupados(dateFormatted);
+      slotsContainer.innerHTML = "";
+
       horarios.forEach((hour) => {
+        const isOcupado = ocupados.includes(hour);
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.textContent = hour;
-        btn.className = "py-2 px-3 text-sm font-medium rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-white transition";
 
-        btn.onclick = () => {
-          document.querySelectorAll("#slotsContainer button").forEach(b => {
-            b.className = "py-2 px-3 text-sm font-medium rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-white transition";
-          });
-          btn.className = "py-2 px-3 text-sm font-bold rounded-lg border border-amber-500 bg-amber-500 text-zinc-950 transition shadow-md shadow-amber-500/20";
-          selectedTimeInput.value = hour;
-        };
+        if (isOcupado) {
+          btn.disabled = true;
+          btn.innerHTML = `<span>${hour}</span> <span class="block text-[10px] text-zinc-500 font-normal">Ocupado</span>`;
+          btn.className = "py-2 px-1 text-xs font-semibold rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-600 cursor-not-allowed line-through";
+        } else {
+          btn.textContent = hour;
+          btn.className = "py-2 px-3 text-sm font-medium rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-white transition";
+
+          btn.onclick = () => {
+            document.querySelectorAll("#slotsContainer button:not([disabled])").forEach(b => {
+              b.className = "py-2 px-3 text-sm font-medium rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-amber-500/50 hover:text-white transition";
+            });
+            btn.className = "py-2 px-3 text-sm font-bold rounded-lg border border-amber-500 bg-amber-500 text-zinc-950 transition shadow-md shadow-amber-500/20";
+            selectedTimeInput.value = hour;
+          };
+        }
 
         slotsContainer.appendChild(btn);
       });
@@ -181,7 +123,7 @@
 
       const time = selectedTimeInput.value;
       if (!time) {
-        alert("Por favor, selecione um horário clicando em um dos blocos.");
+        alert("Por favor, selecione um horário disponível.");
         return;
       }
 
@@ -199,7 +141,6 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = "<span>Gravando agendamento...</span>";
 
-      // 1. Salvar na Planilha do Google
       const payload = {
         nome: name,
         telefone: phone,
@@ -216,10 +157,9 @@
           body: JSON.stringify(payload)
         });
       } catch (err) {
-        console.error("Erro ao salvar na planilha:", err);
+        console.error("Erro ao salvar:", err);
       }
 
-      // 2. Monta mensagem idêntica ao padrão da barbearia
       const msg = `💈 *AGENDAMENTO – BIEL DO CORTE* 💈\n\n` +
                   `👤 *Nome:* ${name}\n` +
                   `📱 *Telefone:* ${phone}\n` +
@@ -230,10 +170,11 @@
 
       const url = `https://wa.me/${BARBER_WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
+      // Atualiza a tela para o horário recém-marcado ficar bloqueado na hora
+      renderSlots();
+
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
       window.open(url, "_blank");
     });
   </script>
-</body>
-</html>

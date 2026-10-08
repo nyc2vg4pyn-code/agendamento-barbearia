@@ -15,7 +15,7 @@
       <div class="inline-flex items-center justify-center w-14 h-14 bg-amber-500/10 text-amber-500 rounded-full mb-3 text-2xl">
         <i class="fa-solid fa-scissors"></i>
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-white">Barbearia do Irmão</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-white">Barbearia</h1>
       <p class="text-sm text-zinc-400 mt-1">Escolha o serviço, data e o melhor horário</p>
     </div>
 
@@ -40,9 +40,9 @@
         <select id="serviceSelect" required
           class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
           <option value="Corte de Cabelo (R$ 35)">Corte de Cabelo — R$ 35</option>
-          <option value="Barba (R$ 15)">Barba Terapia — R$ 15</option>
-          <option value="Combo Cabelo + Barba (R$ 45)">Combo Cabelo + Barba — R$ 45</option>
-          <option value="Sobrancelha (R$ 10)">Sobrancelha — R$ 10</option>
+          <option value="Barba Terapia (R$ 30)">Barba Terapia — R$ 30</option>
+          <option value="Combo Cabelo + Barba (R$ 60)">Combo Cabelo + Barba — R$ 60</option>
+          <option value="Sobrancelha (R$ 15)">Sobrancelha — R$ 15</option>
         </select>
       </div>
 
@@ -50,7 +50,7 @@
       <div>
         <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Data</label>
         <input type="date" id="bookingDate" required
-          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" />
+          class="w-full bg-zinc-800/80 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
       </div>
 
       <!-- 5. Horário -->
@@ -72,14 +72,17 @@
   </main>
 
   <script>
-    // CONFIGURAÇÃO: Coloque aqui o DDD + Telefone do seu irmão (só números)
-    const BARBER_WHATSAPP = "5532999996312"; 
+    // ==========================================
+    // ⚙️ COLOQUE SUAS DUAS CONFIGURAÇÕES AQUI:
+    // ==========================================
+    const BARBER_WHATSAPP = "5532999996312"; // Zap do seu irmão (DDD + número)
+    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxKoKCz0ywvjVSAzITK82x6ob7P2QU-aEpsgQHze0zOrGR0U9iwFwVpTxMqtaZKV08n/exec"; // O link que você copiou da imagem anterior
+    // ==========================================
 
-    // Horários de atendimento disponíveis
     const DEFAULT_HOURS = [
-      "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:30", "11:00",
-      "11:30", "13:30", "14:15", "15:00", "15:45",
-      "16:30", "17:15", "18:00", "18:45", "19:45"
+      "09:00", "09:45", "10:30", "11:15",
+      "13:30", "14:15", "15:00", "15:45",
+      "16:30", "17:15", "18:00", "18:45"
     ];
 
     const dateInput = document.getElementById("bookingDate");
@@ -87,18 +90,15 @@
     const selectedTimeInput = document.getElementById("selectedTime");
     const phoneInput = document.getElementById("clientPhone");
 
-    // Limita a data mínima para hoje
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
     dateInput.value = today;
 
-    // Máscara simples de telefone
     phoneInput.addEventListener("input", (e) => {
       let x = e.target.value.replace(/\D/g, "").match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
       e.target.value = !x[2] ? x[1] : `(${x[1]}) ${x[2]}` + (x[3] ? `-${x[3]}` : "");
     });
 
-    // Renderizar blocos de horários
     function renderSlots() {
       slotsContainer.innerHTML = "";
       selectedTimeInput.value = "";
@@ -123,8 +123,7 @@
 
     renderSlots();
 
-    // Envio do Formulário -> WhatsApp
-    document.getElementById("bookingForm").addEventListener("submit", (e) => {
+    document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const time = selectedTimeInput.value;
@@ -136,19 +135,48 @@
       const name = document.getElementById("clientName").value.trim();
       const phone = document.getElementById("clientPhone").value.trim();
       const service = document.getElementById("serviceSelect").value;
-      const date = dateInput.value.split("-").reverse().join("/");
+      const dateFormatted = dateInput.value.split("-").reverse().join("/");
 
-      // Formata mensagem amigável
+      const submitBtn = e.target.querySelector("button[type='submit']");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Salvando agendamento...</span>";
+
+      // 1. Salva na Planilha
+      const payload = {
+        nome: name,
+        telefone: phone,
+        servico: service,
+        dataAgendamento: dateFormatted,
+        horario: time
+      };
+
+      try {
+        await fetch(GOOGLE_SHEETS_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error("Erro ao salvar na planilha:", err);
+      }
+
+      // 2. Abre o WhatsApp
       const msg = `Fala! Gostaria de agendar um horário na barbearia:\n\n` +
                   `👤 *Cliente:* ${name}\n` +
                   `📱 *Telefone:* ${phone}\n` +
                   `✂️ *Serviço:* ${service}\n` +
-                  `📅 *Data:* ${date}\n` +
+                  `📅 *Data:* ${dateFormatted}\n` +
                   `⏰ *Horário:* ${time}\n\n` +
                   `Pode confirmar para mim? Valeu!`;
 
-      // Redireciona para o WhatsApp
       const url = `https://wa.me/${BARBER_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+      
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
       window.open(url, "_blank");
     });
   </script>
